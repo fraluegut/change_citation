@@ -1,16 +1,32 @@
-# This is a sample Python script.
-
-# Press Mayús+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+import docx
+from citation_parser import CitationParser
+from csl_py import CSL
 
 
-# Press the green button in the gutter to run the script.
+def convert_bibliography(docx_file, target_style):
+    # Leer el archivo de Word
+    document = docx.Document(docx_file)
+
+    # Inicializar el parser de citas y el convertidor de estilos
+    parser = CitationParser()
+    converter = CSL(target_style)
+
+    # Iterar a través de cada párrafo del documento
+    for para in document.paragraphs:
+        # Extraer información de las citas bibliográficas del párrafo
+        citations = parser.extract_citations(para.text)
+
+        # Si se encontraron citas, convertir cada una al estilo deseado
+        if citations:
+            for citation in citations:
+                ref = converter.render(citation, 'bibliography')
+                para.text = para.text.replace(citation.text, ref)
+
+    # Guardar el documento con las citas convertidas
+    document.save(docx_file)
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    docx_file = 'documento.docx'
+    target_style = 'apa'  # Estilo APA
+    convert_bibliography(docx_file, target_style)
